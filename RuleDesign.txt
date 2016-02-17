@@ -1,0 +1,139 @@
+EP0 '(AFTER ANTE (S0)
+                  CONSEQ (S1))
+      
+      EP1 '(TEACH AGENT (HUMAN F-NAME (GEORGE)
+                               GENDER (MALE))
+                  RECIP (HUMAN TYPE (STUDENTS))
+                  OBJECT (CHEM)
+                  LOC (HIGHSCHOOL) 
+                  SITU (S1))
+      
+      EP2 '(INFORM AGENT (HUMAN ROLE (ONCOLOGIST))
+                   RECIP (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE)
+                                              GENDER (MALE))
+                                 OBJECT (CANCER TYPE (TERMINAL)))
+                   SITU (S1))
+      
+      EP3 '(STATE TYPE (PHYSICAL)
+                  AGENT (HUMAN F-NAME (WINNIE)
+                               GENDER (FEMALE))
+                  VALUE (PREGNANT)
+                  SITU (S2))
+      
+      EP4 '(MARRIED AGENT (HUMAN F-NAME (GEORGE)
+                                 GENDER (MALE))
+                    OBJECT (HUMAN F-NAME (WINNIE)
+                                  GENDER (FEMALE))
+                    SITU (S1))
+      
+      EP5 '(AFTER ANTE (S1)
+                  CONSEQ (S2))
+      
+      EP6 '(AFTER ANTE (S2)
+                  CONSEQ (S3))
+      
+      EP7 '(AFTER ANTE (S3)
+                  CONSEQ (S4))
+      
+      EP8 '(INGEST AGENT (HUMAN F-NAME (RICK)
+                                GENDER (MALE))
+                   OBJECT (COCAINE)
+                   SITU (S4))
+      
+      EP9 '(AFTER ANTE (S4)
+                  CONSEQ (S5))
+      
+      EP10 '(STATE AGENT (HUMAN F-NAME (RICK)
+                                GENDER (MALE))
+                   OBJECT (LESIONS AREA (NOSE))
+                   SITU (S5))
+      
+      EP11 '(AFTER ANTE (S2)
+                   CONSEQ (S4))
+      
+      EPMEM (LIST EP0 EP1 EP2 EP3 EP4 EP5 EP6 EP7 EP8 EP9 EP10 EP11)
+      
+      
+      
+      
+RETURNS:
+
+RULE 1
+IF (x TEACHES in SITU z) 
+THEN (x is HAPPY in SITU z)
+
+(MP-INFER RULE-1 EPMEM)
+
+      INF1 '(STATE AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   TYPE (EMOTIONAL)
+                   VALUE (HAPPY)
+                   SITU (S1))
+-----------------------------------------------------------
+      INF2 '(KNOWS AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE)
+                                              GENDER (MALE))
+                                 OBJECT (CANCER TYPE (TERMINAL)))
+                   SITU (S2))
+      
+-----------------------------------------------------------
+IF (x KNOWS (x has STATE of CANCER) in SITU sa) 
+THEN (x is SAD in SITU sa)
+
+(MP-INFER RULE-3 (cons INF2 EPMEM))
+      
+      INF3 '(STATE TYPE (EMOTIONAL)
+                   AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   VALUE (SAD)
+                   SITU (S2))
+-----------------------------------------------------------   
+IF (x is MARRIED to y in SITU sa) AND (y is PREGNANT in SITU sb)
+THEN (x had SEX with y in SITU sa)
+
+(MP-INFER RULE-4 EPMEM)
+
+      INF4 '(SEX-ACT AGENT (HUMAN F-NAME (GEORGE)
+                                  GENDER (MALE))
+                     OBJECT (HUMAN F-NAME (WINNIE)
+                                   GENDER (FEMALE))
+                     SITU (S1))
+-----------------------------------------------------------      
+IF (x TEACHES CHEM in SITU sa) AND (x is SAD in SITU sb) AND (sb AFTER sa)
+THEN (x MAKES COCAINE in SITU sb)
+
+(MP-INFER RULE-5 (cons INF3 EPMEM))
+
+      INF5 '(MAKES AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   OBJECT (COCAINE)
+                   SITU (S2))
+-----------------------------------------------------------      
+IF (x INGESTS COCAINE in SITU sa) AND (x has NOSE LESIONS in SITU sb) AND (sb AFTER sa)
+THEN (ingesting the COCAINE CAUSEd the LESIONS)
+
+(MP-INFER RULE-6 EPMEM)
+
+      INF6 '(CAUSE ANTE (INGEST AGENT (HUMAN F-NAME (RICK)
+                                             GENDER (MALE))
+                                OBJECT (COCAINE)
+                                SITU (S4))
+                   CONSEQ (STATE AGENT (HUMAN F-NAME (RICK)
+                                              GENDER (MALE))
+                                 OBJECT (LESIONS AREA (NOSE))
+                                 SITU (S5)))
+-----------------------------------------------------------      
+IF (x makes COCAINE in SITU sa) AND (y INGESTs COCAINE in SITU sb) AND (sb AFTER sa)
+THEN (y got the COCAINE from x in SITU sb)
+
+(MP-INFER RULE-7 (cons INF5 EPMEM))
+
+      INF7 '(ACQUIRED AGENT (HUMAN F-NAME (RICK)
+                                   GENDER (MALE))
+                      OBJECT (COCAINE)
+                      FROM (HUMAN F-NAME (GEORGE)
+                                  GENDER (MALE))
+                      SITU (S4))
