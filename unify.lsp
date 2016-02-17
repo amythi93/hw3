@@ -17,23 +17,21 @@
 ;	TESTS
 ;=======================================================
 
-; (UNIFY-FR '(V X) 
-;		    '(HUMAN F-NAME (ANDREW)))
+; (print (UNIFY-FR '(V X) '(HUMAN F-NAME (ANDREW))) )
 
 ; SHOULD RETURN:
 ;	(T (( V X) (HUMAN F-NAME (ANDREW))))
 
 ;-------------------------------------------------------
 
-; (UNIFY-FR '(HUMAN F-NAME (V X))
-;			'(HUMAN L-NAME (DYER) F-NAME (MICHAEL)))
+; (print (UNIFY-FR '(HUMAN F-NAME (V X)) '(HUMAN L-NAME (DYER) F-NAME (MICHAEL))) )
 
 ; SHOULD RETURN:
 ;	(T ((V X) (MICHAEL)))
 
 ;-------------------------------------------------------
-
-;(UNIFY-FR '(
+; (print
+; (UNIFY-FR '(
 ;			 (HUMAN F-NAME (V X))
 ;			 (DRUG NAME (V Y)) 
 ;           )
@@ -43,6 +41,7 @@
 ;            (HUMAN L-NAME LN1
 ;				    F-NAME (GEORGE))
 ;			))
+; )
 
 ; SHOULD RETURN:
 ;	(T ((V X) (GEORGE)) ((V Y) (COCAINE)))
@@ -53,7 +52,7 @@
 
 ; (setq FR2 '(ENABLES CONSEQ (TRAVEL TO (FRANCE) AGENT (V YY01)) ANTE (HAVE AGENT (JOE) OBJECT (V ZZ01))))
 
-; (UNIFY-FR FR1 FR2)
+; (print (UNIFY-FR FR1 FR2) )
 
 ; SHOULD RETURN:
 ; (T ((V XX01) (JOE))
@@ -69,7 +68,7 @@
 
 ; (setq FR4 '(ENABLES ANTE (HAVE AGENT (JOE) OBJECT (V ZZ01)) CONSEQ (TRAVEL AGENT (V YY01) TO (V YY01))))
 
-;(UNIFY-FR FR3 FR4)
+; (print (UNIFY-FR FR3 FR4) )
 
 ; SHOULD RETURN:
 ; NIL
@@ -80,7 +79,7 @@
 
 ; (setq LST2 '((INFORM AGENT (V HUMX02) RECIP (HUMAN F-NAME (GEORGE) GENDER (MALE)) OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE) GENDER (MALE)) OBJECT (CANCER TYPE (TERMINAL))) SITU (V SXA1)) (AFTER CONSEQ (S2) ANTE (V SXA1))))
 
-; (UNIFY-FR LST1 LST2)
+; (print (UNIFY-FR LST1 LST2) )
 
 ; SHOULD RETURN:
 ; (T  	((V SXA1) (S1))
@@ -95,7 +94,7 @@
 
 ; (setq FRM-B '(INFORM SITU (S1) RECIP (V HUMX09) AGENT (HUMAN ROLE (ONCOLOGIST)) OBJECT (STATE OBJECT (V OBJX07) AGENT (HUMAN F-NAME (GEORGE)))))
 
-; (UNIFY-FR FRM-A FRM-B)
+; (print (UNIFY-FR FRM-A FRM-B) ) 
 
 ; SHOULD RETURN:
 ; (T 	((V HUMX09) (HUMAN F-NAME (GEORGE)))
