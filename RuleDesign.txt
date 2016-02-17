@@ -57,8 +57,9 @@ EP0 '(AFTER ANTE (S0)
       
       
       
-      
+===========================================================      
 RETURNS:
+===========================================================
 
 RULE 1
 IF (x TEACHES in SITU z) 
@@ -72,6 +73,11 @@ THEN (x is HAPPY in SITU z)
                    VALUE (HAPPY)
                    SITU (S1))
 -----------------------------------------------------------
+IF (x INFORMs y of z in SITUation sa) AND (SITUation sb occurs right AFTER SITUation sa) 
+THEN (y KNOWS z in SITUation sb)
+
+(MP-INFER RULE-2 (LIST EP-2 EP-5))
+
       INF2 '(KNOWS AGENT (HUMAN F-NAME (GEORGE)
                                 GENDER (MALE))
                    OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE)
