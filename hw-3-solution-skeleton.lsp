@@ -95,7 +95,7 @@
 ; OUTPUT:   A FILLER (FRAME or GAP), according to slot in frame, or NIL if not
 ;           present
 (defun GET-SF (slot frame)
-    (cond
+    (condf
         ; Base case: predicate with no slots (or empty frame)
         ((<= (length frame) 1) nil)
         ; If first slot matches, return its filler.
