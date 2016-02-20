@@ -8,7 +8,33 @@
 ;                      end
 ; OUTPUT:   NEW-EPMEM
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))
-    'UNIMPLEMENTED
+	
+	
+	(loop for each mRule in rules do 
+		(let * ((newC (MP-INFER mRUle EPMEM)))
+		
+			(if (not (find newC (EPMEM) )) 		
+				(FRW-CHAIN (remove mRule rules) epmem &optional (new-epmem nil) )
+				
+				
+				(return-from FRW-CHAIN) ;;when all rules has been tried once 
+			)
+					;;how do we remember NEW in this case?????
+		
+		
+		)
+	)
+	
+	(if (null newC) ;;can't find newC here
+		new-epmem
+		(progn 
+		 	(let* ((newL (cons newC epmem)))
+		 	(FRW-CHAIN rules epmem &optional (new-epmem nil))
+			)
+		
+		)
+	)
+
 )
 
 
