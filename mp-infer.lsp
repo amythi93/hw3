@@ -7,7 +7,22 @@
 ; OUTPUT:   conclusion if successfully unified; nil otherwise
 (defun MP-INFER (rule o-frames)
    
-   heyyo
+   (let* ((prem (car rule)) (conc (cdr rule)) (result (UNIFY-FR prem conc )))  ;setting the premises and conclusion here
+   
+    (if (null result  )  ;if we can't unify here, we return nil
+ 				   nil)
+ 				   
+ 	
+	
+	
+  ;general idea: loop through each list of frames and unify it with the rule and then we call 
+  ;subst-fr and boom
+  
+  
+  
+  
+  
+  )
 )
 
 
@@ -43,5 +58,22 @@
 
 
 
+(setq RULE-2 '((PREMISES
+(INFORM AGENT (V x)
+RECIP (V y) OBJECT (V z) SITU (V sa))
+(AFTER ANTE (V sa) CONSEQ (V sb))
+) (CONCLU
+(KNOWS AGENT (V y) OBJECT (V z) SITU (V sb))
+)))
+
+
+(setq test '(T ((V XX01) (JOE))
+   ((V ZZ01) (MONEY))
+   ((V YY01) (JOE))
+   ((V QQ01) (FRANCE))
+))
+
+
+(print (cdr test))
 
 
