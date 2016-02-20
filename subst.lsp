@@ -17,7 +17,7 @@
 
 ; (setq BD1 '(T ((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE))) ((V SS01) (S2)) ((V TY01) (TERMINAL))))
 
-; (setq FR6 '(KNOWS AGENT (V HX1) OBJECT (STATE TYPE (PHYSICAL) AGENT (V HX1) OBJECT (CANCER TYPE (V TY01))) SITU (V SS01)))
+(setq FR6 '(KNOWS AGENT (V HX1) OBJECT (STATE TYPE (PHYSICAL) AGENT (V HX1) OBJECT (CANCER TYPE (V TY01))) SITU (V SS01)))
 
 ; (print (SUBST-FR FR6 BD1) )
 
@@ -33,3 +33,11 @@
 
 
 
+
+
+
+
+	(loop for x in FR6 do
+		(print x)
+
+	)

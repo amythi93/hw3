@@ -33,3 +33,19 @@
 
 
 
+;function FOL-FC-ASK(KB,α) returns a substitution or false 
+;inputs: KB , the knowledge base, a set of first-order definite clauses
+;		α, the query, an atomic sentence
+;local variables: new, the new sentences inferred on each iteration
+;repeat until new is empty 
+;	new ← { }
+;	for each rule in KB do
+;		(p1 ∧ . . . ∧ pn ⇒ q) ← STANDARDIZE-VARIABLES(rule)
+;		for each θ such that SUBST(θ,p1 ∧ ... ∧ pn) = SUBST(θ,p1′ ∧ ... ∧ pn′ )for some p1′ ,...,pn′ in KB 
+;			q′ ←SUBST(θ,q)
+;			if q′ does not unify with some sentence already in KB or new then 
+;				add q′ to new
+;				φ ← UNIFY(q′, α)
+;				if φ is not fail then return φ 
+;		add new to KB
+;return false
