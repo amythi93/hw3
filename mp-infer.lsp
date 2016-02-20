@@ -6,7 +6,8 @@
 ;           O-FRAMES: a list of facts / concepts
 ; OUTPUT:   conclusion if successfully unified; nil otherwise
 (defun MP-INFER (rule o-frames)
-    'UNIMPLEMENTED
+   
+   heyyo
 )
 
 
