@@ -5,33 +5,26 @@
 ;           BDS: a binding list
 ; OUTPUT:   FRM with replacements made
 
-
-(defun SUBST-HELPER (frm bd)
-	(let ((returnFrame nil))
-		(loop for x in frm do
-			(if (equal (car bd) x)
-				(setq returnFrame (append returnFrame (cdr bd)))
-				(if (listp x)
-					(SUBST-HELPER x bd)
-				)
-			)
-		)
-		returnFrame
-	)
-)
-
 (defun SUBST-FR (frm bds)
     (if (equal bds nil) 
     	frm
     	(progn
-    		(let ((returnFrame '()))
-	    		(loop for x in (rest bds) do
-	    			(print x)
-	    			(if (equal (SUBST-HELPER frm x) nil)
-	    				(setq returnFrame (append returnFrame x))
-	    				(setq returnFrame (append returnFrame (SUBST-HELPER frm x)))
+    		(let ((returnFrame '()) (truth nil))
+	    		(loop for x in frm do
+	    			(if (listp x)
+	    				(progn
+	    					(loop for y in (rest bds) do
+	    						(if (equal (car y) x)
+	    							(progn
+	    								(setq returnFrame (append returnFrame (cdr y)))
+	    								(setq truth t)
+	    							)
+	    						)
+	    					)
+	    				)
+	    				(setq returnFrame (append returnFrame (list x)))
 	    			)
-	    		)
+    			)
     		returnFrame
     		)
 		)
@@ -46,14 +39,21 @@
 ;	TESTS
 ;=======================================================
 
-(setq BD1 '(T ((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE))) ((V SS01) (S2)) ((V TY01) (TERMINAL))))
+(setq BD1 '(T 
+	((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE))) 
+	((V SS01) (S2)) 
+	((V TY01) (TERMINAL)))
+)
 
-(setq FR6 '(KNOWS AGENT (V HX1) OBJECT (STATE TYPE (PHYSICAL) AGENT (V HX1) OBJECT (CANCER TYPE (V TY01))) SITU (V SS01)))
+(setq FR6 '(KNOWS AGENT (V HX1) 
+				  OBJECT (STATE TYPE (PHYSICAL) 
+				  				AGENT (V HX1) 
+				  				OBJECT (CANCER TYPE (V TY01))) 
+  				  SITU (V SS01))
+)
 
 (print 
-
 	(SUBST-FR FR6 BD1)
-
 )
 
 ; SHOULD RETURN:
@@ -67,12 +67,3 @@
 
 
 
-
-
-
-
-
-	(loop for x in FR6 do
-		(print x)
-
-	)
