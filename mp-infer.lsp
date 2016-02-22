@@ -9,24 +9,16 @@
    					;an extra cdr here because of the prem 
    (let* ((prem (cdr (car rule))) (conc (cdr (cdr rule)) )    )  ;setting the premises and conclusion here
    
-    (if (null result  )  ;if we can't unify here, we return nil
+    (if (null prem  )  ;if prem is nil here, we return nil
  				   nil)
+ 	(if (null conc)	nil) ;if conclusion is nil here we return nil
+ 	
  				   
  				   ;cdr here because we don't want no T in our list
- 	(let* ((oriList  (UNIFY-FR (car prem) (car o-frames))  ))
- 	
- 		(loop for x from 1 to (- (LIST-LENGTH -frames) 1) ;for each element in the list, we want to check each pair
- 			(cons oriList (UNIFY-FR (nth x prem) (nth x o-frames) ))
- 	
- 	
- 	
- 	
- 		)
- 	
- 	
- 		(SUBST-FR conc oriList ) ;;not sure if we should include conclusion or not 
- 	
- 	
+ 				   
+ 	(let* ((oriList  (UNIFY-FR  prem o-frames  )))
+ 
+ 		(return-from MP-INFER (SUBST-FR oriList conc) ) ;return the result here
  	
  	
  	)
