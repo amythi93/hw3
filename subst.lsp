@@ -5,13 +5,17 @@
 ;           BDS: a binding list
 ; OUTPUT:   FRM with replacements made
 
+(defun RECURSIVELY-CHECK-FRAME (frm bds)
+	'UNIMPLEMENTED
+)
+
 (defun SUBST-FR (frm bds)
     (if (equal bds nil) 
     	frm
     	(progn
     		(let ((returnFrame '()) (truth nil))
 	    		(loop for x in frm do
-	    			(if (listp x)
+	    			(if (and (listp x) (equal (length x) 2))
 	    				(progn
 	    					(loop for y in (rest bds) do
 	    						(if (equal (car y) x)
@@ -22,7 +26,10 @@
 	    						)
 	    					)
 	    				)
-	    				(setq returnFrame (append returnFrame (list x)))
+	    				(if (listp x)
+	    					(RECURSIVELY-CHECK-FRAME x (rest bds))
+	    					(setq returnFrame (append returnFrame (list x)))
+	    				)
 	    			)
     			)
     		returnFrame
