@@ -14,8 +14,28 @@
 )
 
 
-(defun RECURSIVELY-CHECKS-FRAME (frm bds)
-	'UNIMPLEMENTED	
+(defun RECURSIVELY-CHECKS-FRAME (frm bds returnFrame)
+	(cond
+		((null frm) 
+			returnFrame
+		)
+		((atom (car frm))
+			(setq returnFrame (append returnFrame (list(car frm))))
+			(RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+		)
+		( (and (listp (car frm)) (equal (length (car frm)) 1))
+			(setq returnFrame (cons returnFrame (list (car frm))))
+			(RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+		)
+		( (and (listp (car frm)) (equal (length (car frm)) 2) (equal (CHECKS-AGAINST-BDS (car frm) bds) nil))
+			(setq returnFrame (append returnFrame (list (car frm))))
+		)
+		( (and (listp (car frm)) (equal (length (car frm)) 2) (not (equal (CHECKS-AGAINST-BDS (car frm) bds) nil)))
+			(setq returnFrame (append returnFrame (CHECKS-AGAINST-BDS (car frm) bds)))
+			(RECURSIVELY-CHECKS-FRAME (rest frm) bds returnFrame)
+		)
+		(T (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame))
+	)
 )
 
 
@@ -37,7 +57,11 @@
 	    					)
 	    				)
 	    				(if (listp x)
-							(setq returnFrame (append returnFrame (RECURSIVELY-CHECKS-FRAME x (rest bds) )))
+	    					(progn
+	    						(let ((rframe nil))
+									(setq returnFrame (append returnFrame (RECURSIVELY-CHECKS-FRAME x (rest bds) rframe)))
+	    						)
+	    					)
 	    					(setq returnFrame (append returnFrame (list x)))
 	    				)
 	    			)
