@@ -5,9 +5,19 @@
 ;           BDS: a binding list
 ; OUTPUT:   FRM with replacements made
 
-(defun RECURSIVELY-CHECK-FRAME (frm bds)
-	'UNIMPLEMENTED
+(defun CHECKS-AGAINST-BDS (lst bds)
+	(loop for y in bds do
+		(if (equal (car y) lst)
+			(return (rest y))
+		)
+	)
 )
+
+
+(defun RECURSIVELY-CHECKS-FRAME (frm bds)
+	'UNIMPLEMENTED	
+)
+
 
 (defun SUBST-FR (frm bds)
     (if (equal bds nil) 
@@ -27,7 +37,7 @@
 	    					)
 	    				)
 	    				(if (listp x)
-	    					(RECURSIVELY-CHECK-FRAME x (rest bds))
+							(setq returnFrame (append returnFrame (RECURSIVELY-CHECKS-FRAME x (rest bds) )))
 	    					(setq returnFrame (append returnFrame (list x)))
 	    				)
 	    			)
@@ -39,7 +49,8 @@
 )
 
 
-
+;NOTES:
+;remove local variable truth if unnecessary
 
 
 ;=======================================================
@@ -62,6 +73,7 @@
 (print 
 	(SUBST-FR FR6 BD1)
 )
+
 
 ; SHOULD RETURN:
 ;	(KNOWS AGENT (HUMAN F-NAME (GEORGE)
