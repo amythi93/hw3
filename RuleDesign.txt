@@ -56,7 +56,14 @@ EP0 '(AFTER ANTE (S0)
       EPMEM (LIST EP0 EP1 EP2 EP3 EP4 EP5 EP6 EP7 EP8 EP9 EP10 EP11)
       
       
-      
+
+
+; question 1: what do we do if there’s keyword in the rule? like COCACINE
+; question 2: for unrelated variables, do we just put an arbitrary variable (it’s
+; not gonna be binded anyways)
+; question 3: for the mp-infer function, are we supposed to do setq INF2 or something?
+; quesition 4: is the format for the rule writing right? How do we test it?
+
 ===========================================================      
 RETURNS:
 ===========================================================
@@ -67,9 +74,9 @@ THEN (x is HAPPY in SITU z)
 
 RULE-1=((PREMISES 
 			(TEACH AGENT(V x)
-					RECIP(V y)
-					OBJECT(V k)
-					LOC(V j)
+					RECIP(HUMAN TYPE (STUDENTS))
+					OBJECT(CHEM)
+					LOC(HIGHSCHOOL)
 				    SITU(V z)   )
 		)
 		
@@ -128,7 +135,7 @@ RULE-3=((PREMISES
 			( KNOWS 
 					AGENT (V x)
 					OBJECT( STATE AGENT (V x)
-								 OBJECT (CANCER)
+							OBJECT (CANCER TYPE (TERMINAL)))
 						)
 					SITU (V sa)
 			)				
@@ -139,7 +146,7 @@ RULE-3=((PREMISES
 	  		(
 	  		 STATE TYPE (EMOTIONAL)
 	  		 		AGENT(V x)
-	  		 		VALUE (sad)
+	  		 		VALUE (SAD)
 	  		 		SITU (V sa)
 	  		
 	  		
@@ -173,9 +180,9 @@ RULE-4= ((PREMISES
 						 OBJECT (V y)
 						 SITU (V sa)
 				)
-				(STATE TYPE (V k)
+				(STATE TYPE (PHYSICAL)
 						AGENT (V y)
-						VALUE (V j)
+						VALUE (PREGNANT)
 						SITU (V sb))
 						
 		)
@@ -186,7 +193,7 @@ RULE-4= ((PREMISES
 		  	
 		  	)
 		  
-		  ==
+		  
 		  )
 		  
 		  
@@ -206,11 +213,11 @@ THEN (x MAKES COCAINE in SITU sb)
 
 RULE-5=((PREMISES
 			(TEACH AGENT (V x)
-					RECIP(V k)
+					RECIP(HUMAN TYPE (STUDENTS))
 					OBJECT(CHEM)
-					LOC(V l)
+					LOC(HIGHSCHOOL)
 					SITU(V sa))
-			(STATE TYPE (V j)
+			(STATE TYPE (EMOTIONAL)
 					AGENT(V x)
 					VALUE(SAD)
 					SITU(V sb))
@@ -220,7 +227,7 @@ RULE-5=((PREMISES
 	)
 	(CONCLU 
 		(MAKES AGENT (V x)
-				OBJECT(COACINE)
+				OBJECT(COCAINE)
 				SITU(V sb)
 		
 		

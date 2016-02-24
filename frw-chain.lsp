@@ -20,8 +20,8 @@
 				(return-from FRW-CHAIN) ;;when all rules has been tried once 
 			)
 					;;how do we remember NEW in this case?????
-		
-		
+					;; can we use stack here?
+					;; is it a global variable?
 		)
 	)
 	
