@@ -1117,11 +1117,7 @@
         nil) ;if conclusion is nil here we return nil
                    ;cdr here because we don't want no T in our list
     (let* ((oriList  (UNIFY-FR  prem o-frames  )))
-        (print (SUBST-FR conc oriList))  ;return the result here
-        (print "------------")
-        (print conc)
-        (print "------------")
-        (print oriList)
+        (SUBST-FR conc oriList)
         
     )
 )
@@ -1225,8 +1221,9 @@
                         SITU (V sb))
                )
                (CONCLU
-                    (SEX_ACT AGENT (V x)
-                        OBJECT (V y))
+                    (SEX-ACT AGENT (V x)
+                        OBJECT (V y)
+                        SITU(V sa))
                ))
       
       RULE-5 '((PREMISES
@@ -1265,8 +1262,11 @@
                     SITU (V sa))
                    CONSEQ (STATE AGENT (V x)
                         OBJECT (LESIONS AREA (NOSE))
-                        SITU (V sb)))
-               ))
+                        SITU (V sb)
+                        )
+                )
+               )
+               )
       
       RULE-7 '((PREMISES
                 (MAKES AGENT (V x)
@@ -1478,7 +1478,7 @@
 ; -----------------------------------------------------------------------------
 
 (print 
-   (MP-INFER RULE-2 (LIST EP2 EP5))
+ (MP-INFER RULE-6 EPMEM)
 )
 (setq BD1 '(T ((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE)))
          ((V SS01) (S2))

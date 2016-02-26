@@ -184,9 +184,9 @@ RULE-4= ((PREMISES
 						
 		)
 		  (CONCLU 
-		  	( SEX_ACT AGENT (V x)
+		  	( SEX-ACT AGENT (V x)
 		  			  OBJECT (V y)
-
+		  			  
 		  	
 		  	)
 		  
