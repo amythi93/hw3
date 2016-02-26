@@ -10,30 +10,32 @@
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))
 	
 	
-	(loop for each mRule in rules do 
-		(let * ((newC (MP-INFER mRUle EPMEM)))
+	(let* ((newC nil )))
+	
+		(loop for each mRule in rules do 
 		
-			(if (not (find newC (EPMEM) )) 		
-				(FRW-CHAIN (remove mRule rules) epmem &optional (new-epmem nil) )
+			(setq newC (MP-INFER mRule epmem) )
+	
+			(if (null newC) 
+				(return-from FRW-CHAIN new-epmem)
 				
 				
-				(return-from FRW-CHAIN) ;;when all rules has been tried once 
+				(FRW-CHAIN (rules epmem (cons newC new-epmem)))
 			)
-					;;how do we remember NEW in this case?????
-					;; can we use stack here?
-					;; is it a global variable?
+		
+		
+		
 		)
+	
+	
+		
+		
+		
+		
+	
 	)
 	
-	(if (null newC) ;;can't find newC here
-		new-epmem
-		(progn 
-		 	(let* ((newL (cons newC epmem)))
-		 	(FRW-CHAIN rules epmem &optional (new-epmem nil))
-			)
-		
-		)
-	)
+	
 
 )
 
