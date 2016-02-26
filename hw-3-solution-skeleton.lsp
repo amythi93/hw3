@@ -1147,48 +1147,24 @@
     )
 )
 
-(defun FRW-HELPER (rules epmem newC &optional (new-epmem nil) )
-    ;(print newC)
-        
+(defun FRW-HELPER (rules epmem newC &optional (new-epmem nil))
     (loop for mRule in rules do 
-
-        (setq new-epmem (MP-INFER mRule epmem) )  ; setting the new-epmem to the conclusion 
-
-        (if (not (null (checkList new-epmem epmem)) )  ;check if new-epmem is contained in epmem or not
+        (setq new-epmem (MP-INFER mRule epmem))
+        (if (not (null (checkList new-epmem epmem)))
             (setq new-epmem nil)
         )
-        ;(print new-epmem)
-        
-        (setq epmem (cons new-epmem epmem ))
-        
-
-
-        (if (not ( null new-epmem ))
+        (setq epmem (cons new-epmem epmem))
+        (if (not (null new-epmem))
             (if (not (null newC))
-
-                ;if newC is not nil, we just append to newC
-                (setq newC (list newC new-epmem ))
-
-                ;if newC is nil, we set newC to new-epmem
+                (setq newC (append newC new-epmem))
                 (setq newC new-epmem)
-
             )
-
         )
-        
-       
-        
-        
-       ; (print new-epmem)  
-        ;(print newC)
-        ;(print 1)
     )
     (if (null new-epmem) 
-        (return-from FRW-HELPER newC)
+        (return-from FRW-HELPER (list newC))
         (FRW-HELPER rules epmem newC )
     )
-
-
 )
 
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))    
