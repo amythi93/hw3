@@ -1003,7 +1003,7 @@
 
  (setq LST2 '((INFORM AGENT (V HUMX02) RECIP (HUMAN F-NAME (GEORGE) GENDER (MALE)) OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE) GENDER (MALE)) OBJECT (CANCER TYPE (TERMINAL))) SITU (V SXA1)) (AFTER CONSEQ (S2) ANTE (V SXA1))))
 
- (print (UNIFY-FR LST1 LST2) )
+ ;(print (UNIFY-FR LST1 LST2) )
 
 ; SHOULD RETURN:
 ; (T    ((V SXA1) (S1))
@@ -1109,14 +1109,19 @@
 ; OUTPUT:   conclusion if successfully unified; nil otherwise
 (defun MP-INFER (rule o-frames)
                     ;an extra cdr here because of the prem 
-   (let* ((prem (cdr (car rule))) (conc (cdr (cdr rule)) )    )  ;setting the premises and conclusion here
+   (let* ((prem (cdr (car rule))) (conc (rest (cdr rule)))     )  ;setting the premises and conclusion here
     (if (null prem  )  ;if prem is nil here, we return nil
        nil)
     (if (null conc) 
         nil) ;if conclusion is nil here we return nil
                    ;cdr here because we don't want no T in our list
     (let* ((oriList  (UNIFY-FR  prem o-frames  )))
-        (SUBST-FR oriList conc)  ;return the result here
+        (print (SUBST-FR conc oriList))  ;return the result here
+        (print "------------")
+        (print conc)
+        (print "------------")
+        (print oriList)
+        
     )
 )
 )
@@ -1280,4 +1285,207 @@
                ))
 )
 
+(setq FR1 '(ENABLES ANTE (HAVE AGENT (V XX01)
+                               OBJECT (MONEY))
+                    CONSEQ (TRAVEL AGENT (V XX01)
+                                   TO (V QQ01)))
+      
+      FR2 '(ENABLES CONSEQ (TRAVEL TO (FRANCE)
+                                   AGENT (V YY01))
+                    ANTE (HAVE AGENT (JOE)
+                               OBJECT (V ZZ01)))
+      
+      FR3 '(ENABLES ANTE (HAVE AGENT (V XX01)
+                               OBJECT (MONEY))
+            CONSEQ (TRAVEL AGENT (V XX01)
+                           TO (FRANCE)))
+      
+      FR4 '(ENABLES ANTE (HAVE AGENT (JOE)
+                               OBJECT (V ZZ01))
+                    CONSEQ (TRAVEL AGENT (V YY01)
+                                   TO (V YY01)))
+      
+      FR6 '(KNOWS AGENT (V HX1)
+                  OBJECT (STATE TYPE (PHYSICAL)
+                                AGENT (V HX1)
+                                OBJECT (CANCER TYPE (V TY01)))
+                  SITU (V SS01))
+      
+      FRM-A '(INFORM RECIP (HUMAN F-NAME (GEORGE))
+                     OBJECT (STATE OBJECT (CANCER TYPE (TERMINAL)))                         
+                     AGENT (V HUMX08))
+      
+      FRM-B '(INFORM SITU (S1)
+                     RECIP (V HUMX09)
+                     AGENT (HUMAN ROLE (ONCOLOGIST))
+                     OBJECT (STATE OBJECT (V OBJX07)
+                                   AGENT (HUMAN F-NAME (GEORGE))))
+      
+      
+      
+      LST1 '(
+              (INFORM SITU (S1)
+                      RECIP (V HUMX01)
+                      AGENT (HUMAN ROLE (ONCOLOGIST))
+                      OBJECT (STATE AGENT (V HUMX01)
+                                    OBJECT (V OBJX01)))
+              
+              (AFTER ANTE (S1)
+                     CONSEQ (V SXB1))
+            )
+      LST2 '(
+              (INFORM AGENT (V HUMX02)
+                      RECIP (HUMAN F-NAME (GEORGE)
+                                   GENDER (MALE))
+                      OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE)
+                                                 GENDER (MALE))
+                                    OBJECT (CANCER TYPE (TERMINAL)))
+                      SITU (V SXA1))
+              
+              (AFTER CONSEQ (S2)
+                     ANTE (V SXA1))
+            )
+      
+      
+      
+      RULE-51 '((PREMISES
+                  (OWNS AGENT (V a1)
+                        OBJECT (V o1))
+                  
+                  (ISA OBJECT (V o1)
+                       TYPE (ICE-CREAM))
+                )
+                (CONCLU
+                  (HAPPY AGENT (V a1))
+                ))
+      
+      RULE-52 '((PREMISES
+                  (HAPPY AGENT (V a1))
+                )
+                (CONCLU
+                  (AWESOME AGENT (V a1))
+                ))
+      
+      
+      
+      EP0 '(AFTER ANTE (S0)
+                  CONSEQ (S1))
+      
+      EP1 '(TEACH AGENT (HUMAN F-NAME (GEORGE)
+                               GENDER (MALE))
+                  RECIP (HUMAN TYPE (STUDENTS))
+                  OBJECT (CHEM)
+                  LOC (HIGHSCHOOL) 
+                  SITU (S1))
+      
+      EP2 '(INFORM AGENT (HUMAN ROLE (ONCOLOGIST))
+                   RECIP (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE)
+                                              GENDER (MALE))
+                                 OBJECT (CANCER TYPE (TERMINAL)))
+                   SITU (S1))
+      
+      EP3 '(STATE TYPE (PHYSICAL)
+                  AGENT (HUMAN F-NAME (WINNIE)
+                               GENDER (FEMALE))
+                  VALUE (PREGNANT)
+                  SITU (S2))
+      
+      EP4 '(MARRIED AGENT (HUMAN F-NAME (GEORGE)
+                                 GENDER (MALE))
+                    OBJECT (HUMAN F-NAME (WINNIE)
+                                  GENDER (FEMALE))
+                    SITU (S1))
+      
+      EP5 '(AFTER ANTE (S1)
+                  CONSEQ (S2))
+      
+      EP6 '(AFTER ANTE (S2)
+                  CONSEQ (S3))
+      
+      EP7 '(AFTER ANTE (S3)
+                  CONSEQ (S4))
+      
+      EP8 '(INGEST AGENT (HUMAN F-NAME (RICK)
+                                GENDER (MALE))
+                   OBJECT (COCAINE)
+                   SITU (S4))
+      
+      EP9 '(AFTER ANTE (S4)
+                  CONSEQ (S5))
+      
+      EP10 '(STATE AGENT (HUMAN F-NAME (RICK)
+                                GENDER (MALE))
+                   OBJECT (LESIONS AREA (NOSE))
+                   SITU (S5))
+      
+      EP11 '(AFTER ANTE (S2)
+                   CONSEQ (S4))
+      
+      EPMEM (LIST EP0 EP1 EP2 EP3 EP4 EP5 EP6 EP7 EP8 EP9 EP10 EP11)
+      
+      
+      INF1 '(STATE AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   TYPE (EMOTIONAL)
+                   VALUE (HAPPY)
+                   SITU (S1))
+      
+      INF2 '(KNOWS AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE)
+                                              GENDER (MALE))
+                                 OBJECT (CANCER TYPE (TERMINAL)))
+                   SITU (S2))
+      
+      INF3 '(STATE TYPE (EMOTIONAL)
+                   AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   VALUE (SAD)
+                   SITU (S2))
+      
+      INF4 '(SEX-ACT AGENT (HUMAN F-NAME (GEORGE)
+                                  GENDER (MALE))
+                     OBJECT (HUMAN F-NAME (WINNIE)
+                                   GENDER (FEMALE))
+                     SITU (S1))
+      
+      INF5 '(MAKES AGENT (HUMAN F-NAME (GEORGE)
+                                GENDER (MALE))
+                   OBJECT (COCAINE)
+                   SITU (S2))
+      
+      INF6 '(CAUSE ANTE (INGEST AGENT (HUMAN F-NAME (RICK)
+                                             GENDER (MALE))
+                                OBJECT (COCAINE)
+                                SITU (S4))
+                   CONSEQ (STATE AGENT (HUMAN F-NAME (RICK)
+                                              GENDER (MALE))
+                                 OBJECT (LESIONS AREA (NOSE))
+                                 SITU (S5)))
+      
+      INF7 '(ACQUIRED AGENT (HUMAN F-NAME (RICK)
+                                   GENDER (MALE))
+                      OBJECT (COCAINE)
+                      FROM (HUMAN F-NAME (GEORGE)
+                                  GENDER (MALE))
+                      SITU (S4))
+)
+
+
 ; -----------------------------------------------------------------------------
+
+(print 
+   (MP-INFER RULE-2 (LIST EP2 EP5))
+)
+(setq BD1 '(T ((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE)))
+         ((V SS01) (S2))
+         ((V TY01) (TERMINAL))
+      )
+      )
+
+;(print 
+ ;   (SUBST-FR FR6 BD1)
+
+;)
