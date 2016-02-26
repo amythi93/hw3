@@ -95,7 +95,7 @@
 ; OUTPUT:   A FILLER (FRAME or GAP), according to slot in frame, or NIL if not
 ;           present
 (defun GET-SF (slot frame)
-    (condf
+    (cond
         ; Base case: predicate with no slots (or empty frame)
         ((<= (length frame) 1) nil)
         ; If first slot matches, return its filler.
@@ -998,6 +998,21 @@
     )
 )
 
+
+ (setq LST1 '((INFORM SITU (S1) RECIP (V HUMX01) AGENT (HUMAN ROLE (ONCOLOGIST)) OBJECT (STATE AGENT (V HUMX01) OBJECT (V OBJX01))) (AFTER ANTE (S1) CONSEQ (V SXB1))))
+
+ (setq LST2 '((INFORM AGENT (V HUMX02) RECIP (HUMAN F-NAME (GEORGE) GENDER (MALE)) OBJECT (STATE AGENT (HUMAN F-NAME (GEORGE) GENDER (MALE)) OBJECT (CANCER TYPE (TERMINAL))) SITU (V SXA1)) (AFTER CONSEQ (S2) ANTE (V SXA1))))
+
+ (print (UNIFY-FR LST1 LST2) )
+
+; SHOULD RETURN:
+; (T    ((V SXA1) (S1))
+;       ((V HUMX01) (HUMAN F-NAME (GEORGE) GENDER (MALE)))
+;       ((V HUMX02) (HUMAN ROLE (ONCOLOGIST))) ((V OBJX01) (CANCER TYPE (TERMINAL))) 
+;       ((V SXB1) (S2))
+; )
+
+
 ; -----------------------------------------------------------------------------
 
 
@@ -1101,8 +1116,10 @@
         nil) ;if conclusion is nil here we return nil
                    ;cdr here because we don't want no T in our list
     (let* ((oriList  (UNIFY-FR  prem o-frames  )))
-        (return-from MP-INFER (SUBST-FR oriList conc) ) ;return the result here
+        (SUBST-FR oriList conc)  ;return the result here
     )
+)
+)
 
 ; -----------------------------------------------------------------------------
 
@@ -1117,16 +1134,27 @@
 ;                      end
 ; OUTPUT:   NEW-EPMEM
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))
-    (let* ((newC nil )))
-        (loop for each mRule in rules do 
+    (let* ((newC nil ))
+        (loop for mRule in rules do 
             (setq newC (MP-INFER mRule epmem) )
-            (if (null newC) 
-                (return-from FRW-CHAIN new-epmem)
-                (FRW-CHAIN (rules epmem (cons newC new-epmem)))
-            )
+
+        
+        )
+
+        (if (null newC) 
+            (return-from FRW-CHAIN new-epmem)
+            (FRW-CHAIN rules epmem (cons newC new-epmem))
         )
     )
 )
+
+
+
+;(setq RULE-51 '((PREMISES (OWNS AGENT (V a1) OBJECT (V o1)) (ISA OBJECT (V o1) TYPE (ICE-CREAM))) (CONCLU (HAPPY AGENT (V a1)) )))
+
+;(setq RULE-52 '((PREMISES (HAPPY AGENT (V a1))) (CONCLU (AWESOME AGENT (V a1)) )))
+
+;(print (FRW-CHAIN (list RULE-51 RULE-52) '((OWNS AGENT (ANDREW) OBJECT (DRUMSTICK)) (ISA OBJECT (DRUMSTICK) TYPE (ICE-CREAM)))) )
 
 ; -----------------------------------------------------------------------------
 
