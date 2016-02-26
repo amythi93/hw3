@@ -1117,7 +1117,15 @@
 ;                      end
 ; OUTPUT:   NEW-EPMEM
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))
-    'UNIMPLEMENTED
+    (let* ((newC nil )))
+        (loop for each mRule in rules do 
+            (setq newC (MP-INFER mRule epmem) )
+            (if (null newC) 
+                (return-from FRW-CHAIN new-epmem)
+                (FRW-CHAIN (rules epmem (cons newC new-epmem)))
+            )
+        )
+    )
 )
 
 ; -----------------------------------------------------------------------------
