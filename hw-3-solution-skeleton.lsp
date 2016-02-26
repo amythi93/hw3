@@ -1109,7 +1109,8 @@
 ; OUTPUT:   conclusion if successfully unified; nil otherwise
 (defun MP-INFER (rule o-frames)
                     ;an extra cdr here because of the prem 
-   (let* ((prem (cdr (car rule))) (conc (rest (cdr rule)))     )  ;setting the premises and conclusion here
+   (let* ((prem (cdr (car rule))) (conc  (first (cdr (first (cdr  rule)) ))) ) ;setting the premises and conclusion here
+
     (if (null prem  )  ;if prem is nil here, we return nil
        nil)
     (if (null conc) 
