@@ -800,8 +800,203 @@
 ;           BDS: [Optional; default: '(T)] A binding list being built during
 ;                execution
 ; OUTPUT:   Binding list
+(defun IS-VAR (vari)
+;check if vari is a variable as defined in the hw
+    (cond
+        ((null vari) 
+            nil
+        )
+        ( (and (listp vari) (equal 2 (length vari)) )
+            (if (and (equal (first vari) 'V) (atom (second vari)) )
+                t
+                nil
+            )
+        )
+        (t nil)
+    )
+)
+
+(defun IS-LIST-FR (vari)
+;check if vari is a list of frames
+    (cond
+        ((null vari)
+            nil
+        )
+        ((listp vari)
+            (loop for v in vari
+                do
+                    (if (not (listp v))
+                        ;v can be nil
+                        (return-from IS-LIST-FR nil)    
+                    )
+            )
+            t
+        )
+        (t
+            nil
+        )
+    ) 
+)
+
+(defun IS-FRAME (vari)
+    (if (and (listp vari) (not (IS-LIST-FR vari)))
+        t
+        nil
+    )
+)
+
+(defun EXIST-IN-BD (vari bd)
+;check if vari already exists in bd, if so return the value it is bound to
+    (loop for e in bd
+        do
+            (if (listp e)
+                (if (equal vari (first e))
+                    (return-from EXIST-IN-BD (second e))
+                )
+            )   
+    )
+    nil
+)
+
+
+(defun UNIFY-VAR (vari x bds)
+    (if (equal vari x)
+        (return-from UNIFY-VAR bds) 
+        ;no need to bind
+    )
+    (if (and (not (IS-VAR (first vari))) (IS-VAR x))
+        (if (not (and (IS-VAR x) (IS-VAR vari) )) 
+            (return-from UNIFY-VAR (UNIFY-VAR x vari bds))
+        )
+    )
+    (if (and (not (IS-VAR x) ) (not (IS-VAR vari)) )
+    ;both are non-varibale, binding fails
+                (return-from UNIFY-VAR nil)
+    )
+    (let ((corres-var-1 (EXIST-IN-BD vari bds)) (corres-var-2 (EXIST-IN-BD x bds)) )
+        (cond
+            ((not (null corres-var-1))
+                (UNIFY-VAR corres-var-1 x bds)
+            )
+            ((not (null corres-var-2))
+                (UNIFY-VAR vari corres-var-2 bds)
+            )
+            (t
+                (append bds (list (list vari x)))  
+            )
+        )
+    )
+)
+
+(defun UNIFY-FRAMES (f1 f2 bd is-complete)
+    (if is-complete
+        (if (equal (first f1) (first f2))
+            (UNIFY-FRAMES (cdr f1) (cdr f2) bd nil)
+            nil
+        )
+        (if (< (length f1) 2)
+            bd
+            (let ((tail (member (first f1) f2))  )
+                (if (null tail)
+                    nil
+                    (let ((result (UNIFY-FR (second f1) (second tail) bd) )  )
+                        ;check if the slot fillers that have the same predicates match
+                        (if (null result)
+                            nil
+                            (let ((recurse-result (UNIFY-FRAMES (nthcdr 2 f1) f2 result nil)) )
+                                recurse-result
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
+)
+
+(defun REMOVE-FRAME (fr list)
+    ;remove a frame from a list of frame
+    (if (null list)
+        (return-from REMOVE-FRAME list)
+    )
+    (if (null fr)
+        nil
+        (let ((cur (first list)) )
+            (if (EQUAL-SF fr cur)
+                (cdr list)
+                (cons cur (REMOVE-FRAME fr (cdr list)))
+            )
+        )
+    )
+)
+
+(defun UNIFY-FR-LIST (l1 l2 bd)
+    (if (null l1)
+        (return-from UNIFY-FR-LIST bd)
+    )
+    (if (or (null l2) (> (length l1) (length l2)))
+        (return-from UNIFY-FR-LIST nil)
+    )
+        (let ((f1 (first l1)) )
+            (loop for f2 in l2
+                do
+                    (let ((new-bd (UNIFY-FR f1 f2 bd)) )
+                        
+                        (if (not (null new-bd)) 
+                            (let ((recurse-result (UNIFY-FR (cdr l1) (REMOVE-FRAME f2 l2) new-bd)) )
+                                ;check if this binding is consistent with the biinding of the rest of frames
+                                (cond
+                                    ((equal (length l1) 1)
+                                        (return-from UNIFY-FR-LIST new-bd)
+                                    )
+                                    (t
+                                        (if (not (null recurse-result))
+                                        
+                                            (let ((u (union new-bd recurse-result)) )
+                                                (return-from UNIFY-FR-LIST u)
+                                            )   
+                                            
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+            )
+        )
+)
+
+
 (defun UNIFY-FR (lfr1 lfr2 &optional (bds '(T)))
-    'UNIMPLEMENTED
+    (if (null bds)
+        (return-from UNIFY-FR nil)
+    )
+    (cond
+        ((equal lfr1 lfr2)
+            bds
+        )
+        ((IS-VAR lfr1)
+            (if (IS-LIST-FR lfr2)
+                nil
+                (UNIFY-VAR lfr1 lfr2 bds) 
+            )
+        )
+        ((IS-VAR lfr2)
+            (if (IS-LIST-FR lfr1)
+                nil
+                (UNIFY-VAR lfr1 lfr2 bds) 
+            )
+        )
+        ((and (IS-FRAME lfr1) (IS-FRAME lfr2))
+            (UNIFY-FRAMES lfr1 lfr2 bds t)
+        )
+        ((and (IS-LIST-FR lfr1) (IS-LIST-FR lfr2))
+            (UNIFY-FR-LIST lfr1 lfr2 bds)
+        )
+        (t
+            nil
+        )
+    )
 )
 
 ; -----------------------------------------------------------------------------
@@ -813,8 +1008,79 @@
 ; INPUT:    FRM: a frame with variables
 ;           BDS: a binding list
 ; OUTPUT:   FRM with replacements made
+(defun CHECKS-AGAINST-BDS (lst bds)
+    (loop for y in bds do
+        (if (equal (car y) lst)
+            (return (rest y))
+        )
+    )
+)
+
+
+(defun RECURSIVELY-CHECKS-FRAME (frm bds returnFrame)
+    (cond
+        ((null frm) 
+            returnFrame
+        )
+        ( (and (atom (car frm)) (listp (car frm)))
+            (setq returnFrame (append returnFrame (list (car frm))))
+            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+        )
+        ((atom (car frm))
+            (setq returnFrame (append returnFrame (list(car frm))))
+            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+        )
+        ( (and (listp (car frm)) (equal (length (car frm)) 1))
+            (setq returnFrame (append returnFrame (list (car frm))))
+            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+        )
+        ( (and (listp (car frm)) (equal (length (car frm)) 2) (equal (CHECKS-AGAINST-BDS (car frm) bds) nil))
+            (setq returnFrame (append returnFrame (list (car frm))))
+            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+        )
+        ( (and (listp (car frm)) (equal (length (car frm)) 2))
+            (setq returnFrame (append returnFrame (CHECKS-AGAINST-BDS (car frm) bds)))
+            (RECURSIVELY-CHECKS-FRAME (rest frm) bds returnFrame)
+        )
+        ( (and (listp (car frm)) (> (length (car frm)) 2))
+             (setq returnFrame (append returnFrame (list (RECURSIVELY-CHECKS-FRAME (car frm) bds nil)))))
+        (T 
+            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+        )
+    )
+)
+
+
 (defun SUBST-FR (frm bds)
-    'UNIMPLEMENTED
+    (if (equal bds nil) 
+        frm
+        (progn
+            (let ((returnFrame '()))
+                (loop for x in frm do
+                    (if (and (listp x) (equal (length x) 2))
+                        (progn
+                            (loop for y in (rest bds) do
+                                (if (equal (car y) x)
+                                    (progn
+                                        (setq returnFrame (append returnFrame (cdr y)))
+                                    )
+                                )
+                            )
+                        )
+                        (if (listp x)
+                            (progn
+                                (let ((rframe nil))
+                                    (setq returnFrame (append returnFrame (list (RECURSIVELY-CHECKS-FRAME x (rest bds) rframe))))
+                                )
+                            )
+                            (setq returnFrame (append returnFrame (list x)))
+                        )
+                    )
+                )
+            returnFrame
+            )
+        )
+    )
 )
 
 ; -----------------------------------------------------------------------------
@@ -828,8 +1094,16 @@
 ;           O-FRAMES: a list of facts / concepts
 ; OUTPUT:   conclusion if successfully unified; nil otherwise
 (defun MP-INFER (rule o-frames)
-    'UNIMPLEMENTED
-)
+                    ;an extra cdr here because of the prem 
+   (let* ((prem (cdr (car rule))) (conc (cdr (cdr rule)) )    )  ;setting the premises and conclusion here
+    (if (null prem  )  ;if prem is nil here, we return nil
+       nil)
+    (if (null conc) 
+        nil) ;if conclusion is nil here we return nil
+                   ;cdr here because we don't want no T in our list
+    (let* ((oriList  (UNIFY-FR  prem o-frames  )))
+        (return-from MP-INFER (SUBST-FR oriList conc) ) ;return the result here
+    )
 
 ; -----------------------------------------------------------------------------
 
@@ -855,10 +1129,18 @@
 ; -----------------------------------------------------------------------------
 
 (setq RULE-1 '((PREMISES
-                 ; TODO
+                 (TEACH AGENT(V x)
+                    RECIP(HUMAN TYPE (STUDENTS))
+                    OBJECT(CHEM)
+                    LOC(HIGHSCHOOL)
+                    SITU(V z))
                )
                (CONCLU
-                 ; TODO
+                (STATE AGENT (V x)
+                    TYPE(EMOTIONAL)
+                    VALUE(HAPPY)
+                    STIU(V z)
+                )
                ))
       
       ; RULE-2 was done for you! Yay!
@@ -878,38 +1160,100 @@
                ))
       
       RULE-3 '((PREMISES
-                 ; TODO
+                 ( KNOWS 
+                    AGENT (V x)
+                    OBJECT( STATE AGENT (V x)
+                            OBJECT (CANCER TYPE (TERMINAL)))
+                    SITU (V sa)
+                 )   
                )
                (CONCLU
-                 ; TODO
-               ))
+                 (
+             STATE TYPE (EMOTIONAL)
+                    AGENT(V x)
+                    VALUE (SAD)
+                    SITU (V sa)
+                )
+           ))
       
       RULE-4 '((PREMISES
-                 ; TODO
+                 (MARRIED AGENT (V x)
+                         OBJECT (V y)
+                         SITU (V sa)
+                )
+                (STATE TYPE (PHYSICAL)
+                        AGENT (V y)
+                        VALUE (PREGNANT)
+                        SITU (V sb))
                )
                (CONCLU
-                 ; TODO
+                ( SEX_ACT AGENT (V x)
+                      OBJECT (V y)
+                )
                ))
       
       RULE-5 '((PREMISES
-                 ; TODO
+                 (TEACH AGENT (V x)
+                    RECIP(HUMAN TYPE (STUDENTS))
+                    OBJECT(CHEM)
+                    LOC(HIGHSCHOOL)
+                    SITU(V sa))
+            (STATE TYPE (EMOTIONAL)
+                    AGENT(V x)
+                    VALUE(SAD)
+                    SITU(V sb))
+                    
+            (AFTER ANTE (V sa)
+                    CONSEQ(V sb))
                )
                (CONCLU
-                 ; TODO
+                 (MAKES AGENT (V x)
+                OBJECT(COCAINE)
+                SITU(V sb)
+                )
                ))
       
       RULE-6 '((PREMISES
-                 ; TODO
+                (INGEST AGENT (V x)
+                    OBJECT (COCAINE)
+                    SITU(V sa)
+                    
+            )
+            (STATE AGENT (V x)
+                    OBJECT(LESIONS AREA (NOSE))
+                    SITU (V sb)
+            )
+            (AFTER ANTE (V sa)
+                    CONSEQ(V sb)
+            )
                )
                (CONCLU
-                 ; TODO
+                 (CAUSE ANTE (INGEST AGENT (V x)
+                                OBJECT (COCAINE)
+                                SITU (V sa))
+                   CONSEQ (STATE AGENT (V x)
+                                 OBJECT (LESIONS AREA (NOSE))
+                                 SITU (V sb))
+                                 
+            )
                ))
       
       RULE-7 '((PREMISES
-                 ; TODO
+                 (MAKES AGENT (V x)
+                    OBJECT (COCAINE)
+                    SITU (V sa))
+            (INGEST AGENT (V y)
+                    OBJECT(COCAINE)
+                    SITU(V sb))
+            (AFTER ANTE (V sa)
+                    CONSEQ(V sb)
+                )
                )
                (CONCLU
-                 ; TODO
+                 (ACQUIRED AGENT (V y)
+                      OBJECT (COCAINE)
+                      FROM (V x)
+                      SITU (V sb))
                ))
 )
 

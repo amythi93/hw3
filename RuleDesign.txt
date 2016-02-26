@@ -136,11 +136,8 @@ RULE-3=((PREMISES
 					AGENT (V x)
 					OBJECT( STATE AGENT (V x)
 							OBJECT (CANCER TYPE (TERMINAL)))
-						)
 					SITU (V sa)
 			)				
-	
-			
 		)
 	  (CONCLU 
 	  		(
@@ -199,7 +196,6 @@ RULE-4= ((PREMISES
 		  
 		)
 
-
 (MP-INFER RULE-4 EPMEM)
 
       INF4 '(SEX-ACT AGENT (HUMAN F-NAME (GEORGE)
@@ -229,12 +225,7 @@ RULE-5=((PREMISES
 		(MAKES AGENT (V x)
 				OBJECT(COCAINE)
 				SITU(V sb)
-		
-		
-		
 		)
-
-
 	)
   )
 
@@ -307,14 +298,11 @@ RULE-7=((PREMISES
 					CONSEQ(V sb)
 				)
 					
-					
 		(CONCLU
 			(ACQUIRED AGENT (V y)
                       OBJECT (COCAINE)
                       FROM (V x)
                       SITU (V sb))
-			
-			
 		)
 	)
 	

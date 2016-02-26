@@ -61,7 +61,7 @@
     (if (equal bds nil) 
     	frm
     	(progn
-    		(let ((returnFrame '()) (truth nil))
+    		(let ((returnFrame '()))
 	    		(loop for x in frm do
 	    			(if (and (listp x) (equal (length x) 2))
 	    				(progn
@@ -69,7 +69,6 @@
 	    						(if (equal (car y) x)
 	    							(progn
 	    								(setq returnFrame (append returnFrame (cdr y)))
-	    								(setq truth t)
 	    							)
 	    						)
 	    					)
