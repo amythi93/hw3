@@ -1157,7 +1157,7 @@
         (if (not (null (checkList new-epmem epmem)) )  ;check if new-epmem is contained in epmem or not
             (setq new-epmem nil)
         )
-        ;(print newc)
+        ;(print new-epmem)
         
         (setq epmem (cons new-epmem epmem ))
         
@@ -1167,7 +1167,7 @@
             (if (not (null newC))
 
                 ;if newC is not nil, we just append to newC
-                (setq newC (cons newC new-epmem ))
+                (setq newC (list newC new-epmem ))
 
                 ;if newC is nil, we set newC to new-epmem
                 (setq newC new-epmem)
