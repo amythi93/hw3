@@ -1049,6 +1049,7 @@
             (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
         )
         ( (and (listp (car frm)) (equal (length (car frm)) 2) (equal (CHECKS-AGAINST-BDS (car frm) bds) nil))
+
             (setq returnFrame (append returnFrame (list (car frm))))
             (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
         )
@@ -1057,7 +1058,8 @@
             (RECURSIVELY-CHECKS-FRAME (rest frm) bds returnFrame)
         )
         ( (and (listp (car frm)) (> (length (car frm)) 2))
-             (setq returnFrame (append returnFrame (list (RECURSIVELY-CHECKS-FRAME (car frm) bds nil)))))
+             (setq returnFrame (append returnFrame (list (RECURSIVELY-CHECKS-FRAME (car frm) bds nil))))
+             (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame))
         (T 
             (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
         )
@@ -1117,8 +1119,7 @@
         nil) ;if conclusion is nil here we return nil
                    ;cdr here because we don't want no T in our list
     (let* ((oriList  (UNIFY-FR  prem o-frames  )))
-        (SUBST-FR conc oriList)
-        
+        (SUBST-FR conc oriList)        
     )
 )
 )
@@ -1135,28 +1136,77 @@
 ;                      facts grown through code execution and returned at the
 ;                      end
 ; OUTPUT:   NEW-EPMEM
-(defun FRW-CHAIN (rules epmem &optional (new-epmem nil))
-    (let* ((newC nil ))
-        (loop for mRule in rules do 
-            (setq newC (MP-INFER mRule epmem) )
 
-        
-        )
-
-        (if (null newC) 
-            (return-from FRW-CHAIN new-epmem)
-            (FRW-CHAIN rules epmem (cons newC new-epmem))
-        )
+(defun checkList (list1 list2)
+    (if (null list2) (return-from checkList nil)) ;base case
+   
+    ;checking if list1 is in list2
+    (if (EQUAL-SF list1 (car list2))
+        (return-from checkList T)
+        (checkList list1 (cdr list2))
     )
 )
 
+(defun FRW-HELPER (rules epmem newC &optional (new-epmem nil) )
+    ;(print newC)
+        
+    (loop for mRule in rules do 
+
+        (setq new-epmem (MP-INFER mRule epmem) )  ; setting the new-epmem to the conclusion 
+
+        (if (not (null (checkList new-epmem epmem)) )  ;check if new-epmem is contained in epmem or not
+            (setq new-epmem nil)
+        )
+        ;(print newc)
+        
+        (setq epmem (cons new-epmem epmem ))
+        
 
 
-;(setq RULE-51 '((PREMISES (OWNS AGENT (V a1) OBJECT (V o1)) (ISA OBJECT (V o1) TYPE (ICE-CREAM))) (CONCLU (HAPPY AGENT (V a1)) )))
+        (if (not ( null new-epmem ))
+            (if (not (null newC))
 
-;(setq RULE-52 '((PREMISES (HAPPY AGENT (V a1))) (CONCLU (AWESOME AGENT (V a1)) )))
+                ;if newC is not nil, we just append to newC
+                (setq newC (cons newC new-epmem ))
 
-;(print (FRW-CHAIN (list RULE-51 RULE-52) '((OWNS AGENT (ANDREW) OBJECT (DRUMSTICK)) (ISA OBJECT (DRUMSTICK) TYPE (ICE-CREAM)))) )
+                ;if newC is nil, we set newC to new-epmem
+                (setq newC new-epmem)
+
+            )
+
+        )
+        
+       
+        
+        
+       ; (print new-epmem)  
+        ;(print newC)
+        ;(print 1)
+    )
+    (if (null new-epmem) 
+        (return-from FRW-HELPER newC)
+        (FRW-HELPER rules epmem newC )
+    )
+
+
+)
+
+(defun FRW-CHAIN (rules epmem &optional (new-epmem nil))    
+    
+    (FRW-HELPER rules epmem nil)
+
+
+)
+
+(setq RULE-51 '((PREMISES (OWNS AGENT (V a1) OBJECT (V o1)) (ISA OBJECT (V o1) TYPE (ICE-CREAM))) (CONCLU (HAPPY AGENT (V a1)) )))
+
+(setq RULE-52 '((PREMISES (HAPPY AGENT (V a1))) (CONCLU (AWESOME AGENT (V a1)) )))
+
+(print 
+
+(FRW-CHAIN (list RULE-51 RULE-52) '((OWNS AGENT (ANDREW) OBJECT (DRUMSTICK)) (ISA OBJECT (DRUMSTICK) TYPE (ICE-CREAM)))) 
+
+)
 
 ; -----------------------------------------------------------------------------
 
@@ -1477,9 +1527,14 @@
 
 ; -----------------------------------------------------------------------------
 
-(print 
- (MP-INFER RULE-6 EPMEM)
-)
+;(print 
+ ;(MP-INFER RULE-1 EPMEM)
+ ;(MP-INFER RULE-3 (cons INF2 EPMEM))
+ ;(MP-INFER RULE-4 EPMEM)
+ ;(MP-INFER RULE-5 (cons INF3 EPMEM))
+ ;(MP-INFER RULE-6 EPMEM)
+ ;(MP-INFER RULE-7 (cons INF5 EPMEM))
+;)
 (setq BD1 '(T ((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE)))
          ((V SS01) (S2))
          ((V TY01) (TERMINAL))
@@ -1490,3 +1545,4 @@
  ;   (SUBST-FR FR6 BD1)
 
 ;)
+
