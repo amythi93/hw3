@@ -1154,17 +1154,49 @@
             (setq new-epmem nil)
         )
         (setq epmem (cons new-epmem epmem))
+
         (if (not (null new-epmem))
             (if (not (null newC))
-                (setq newC (append newC new-epmem))
+                (progn
+                    (setq newC (cons newC (list new-epmem)))
+                )
                 (setq newC new-epmem)
             )
         )
     )
     (if (null new-epmem) 
-        (return-from FRW-HELPER (list newC))
+        (return-from FRW-HELPER newC)
         (FRW-HELPER rules epmem newC )
     )
+)
+
+(setq RULE-51 '((PREMISES (OWNS AGENT (V a1) OBJECT (V o1)) (ISA OBJECT (V o1) TYPE (ICE-CREAM))) (CONCLU (HAPPY AGENT (V a1)) )))
+
+(setq RULE-52 '((PREMISES (HAPPY AGENT (V a1))) (CONCLU (AWESOME AGENT (V a1)) )))
+
+(print (FRW-CHAIN (list RULE-51 RULE-52) '((OWNS AGENT (ANDREW) OBJECT (DRUMSTICK)) (ISA OBJECT (DRUMSTICK) TYPE (ICE-CREAM)))) )
+
+
+
+(print (FRW-CHAIN '(
+                                  ((PREMISES
+                                     (A B (V B1) C (V C1))
+                                   )
+                                   (CONCLU
+                                     (D B (V B1) C (V C1))
+                                   ))
+                                   
+                                  ((PREMISES
+                                     (D B (V B1) C (V C1))
+                                   )
+                                   (CONCLU
+                                     (A B (V C1) C (V B1))
+                                   ))
+                                 )
+                                 '(
+                                    (A B (B1) C (C1))
+                                  )
+                      ) 
 )
 
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))    
