@@ -1022,80 +1022,73 @@
 ; INPUT:    FRM: a frame with variables
 ;           BDS: a binding list
 ; OUTPUT:   FRM with replacements made
-(defun CHECKS-AGAINST-BDS (lst bds)
-    (loop for y in bds do
-        (if (equal (car y) lst)
-            (return (rest y))
-        )
-    )
-)
-
-
-(defun RECURSIVELY-CHECKS-FRAME (frm bds returnFrame)
+(defun RECUR-FRAME-SUB (frame bds returnFrame)
+ (let ((first-e  (first frame)) )
     (cond
-        ((null frm) 
+        ( (null frame) 
             returnFrame
         )
-        ( (and (atom (car frm)) (listp (car frm)))
-            (setq returnFrame (append returnFrame (list (car frm))))
-            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
-        )
-        ((atom (car frm))
-            (setq returnFrame (append returnFrame (list(car frm))))
-            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
-        )
-        ( (and (listp (car frm)) (equal (length (car frm)) 1))
-            (setq returnFrame (append returnFrame (list (car frm))))
-            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
-        )
-        ( (and (listp (car frm)) (equal (length (car frm)) 2) (equal (CHECKS-AGAINST-BDS (car frm) bds) nil))
 
-            (setq returnFrame (append returnFrame (list (car frm))))
-            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+        ( (and (atom first-e) (listp first-e) )
+            (setq returnFrame (append returnFrame (list first-e)))
+            (RECUR-FRAME-SUB (rest frame) bds returnFrame)
         )
-        ( (and (listp (car frm)) (equal (length (car frm)) 2))
-            (setq returnFrame (append returnFrame (CHECKS-AGAINST-BDS (car frm) bds)))
-            (RECURSIVELY-CHECKS-FRAME (rest frm) bds returnFrame)
+
+        ( (atom first-e)
+            (setq returnFrame (append returnFrame ( list first-e )))
+            (RECUR-FRAME-SUB (rest frame) bds returnFrame)
         )
-        ( (and (listp (car frm)) (> (length (car frm)) 2))
-             (setq returnFrame (append returnFrame (list (RECURSIVELY-CHECKS-FRAME (car frm) bds nil))))
-             (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame))
-        (T 
-            (RECURSIVELY-CHECKS-FRAME (cdr frm) bds returnFrame)
+
+        ( (and (listp first-e) (equal (length first-e) 1))
+            (setq returnFrame (append returnFrame (list first-e)))
+            (RECUR-FRAME-SUB (rest frame) bds returnFrame)
+        )
+
+        ( (and (listp first-e) (equal (length first-e) 2) (equal (EXIST-IN-BD first-e bds) nil))
+
+            (setq returnFrame (append returnFrame (list first-e)))
+            (RECUR-FRAME-SUB (rest frame) bds returnFrame)
+        )
+
+        ( (and (listp first-e) (equal (length first-e) 2))
+            (setq returnFrame (append returnFrame (list(EXIST-IN-BD first-e bds))))
+            (RECUR-FRAME-SUB (rest frame) bds returnFrame)
+        )
+
+        ( (and (listp first-e) (> (length first-e) 2))
+             (setq returnFrame (append returnFrame (list (RECUR-FRAME-SUB first-e bds nil))))
+             (RECUR-FRAME-SUB (rest frame) bds returnFrame)
+        )
+
+        (t 
+            (RECUR-FRAME-SUB (rest frame) bds returnFrame)
         )
     )
+
+ )
+    
 )
 
 
 (defun SUBST-FR (frm bds)
-    (if (equal bds nil) 
-        frm
-        (progn
-            (let ((returnFrame '()))
+    (if (null bds) 
+             frm
+            (let ((returnFrame '()) )
                 (loop for x in frm do
                     (if (and (listp x) (equal (length x) 2))
-                        (progn
                             (loop for y in (rest bds) do
-                                (if (equal (car y) x)
-                                    (progn
-                                        (setq returnFrame (append returnFrame (cdr y)))
-                                    )
+                                (if (equal (first y) x)
+                                        (setq returnFrame (append returnFrame (rest y)))     
                                 )
                             )
-                        )
                         (if (listp x)
-                            (progn
-                                (let ((rframe nil))
-                                    (setq returnFrame (append returnFrame (list (RECURSIVELY-CHECKS-FRAME x (rest bds) rframe))))
-                                )
-                            )
+                            (setq returnFrame (append returnFrame (list (RECUR-FRAME-SUB x (rest bds) nil))))
                             (setq returnFrame (append returnFrame (list x)))
                         )
                     )
                 )
             returnFrame
             )
-        )
     )
 )
 
@@ -1110,18 +1103,17 @@
 ;           O-FRAMES: a list of facts / concepts
 ; OUTPUT:   conclusion if successfully unified; nil otherwise
 (defun MP-INFER (rule o-frames)
-                    ;an extra cdr here because of the prem 
-   (let* ((prem (cdr (car rule))) (conc  (first (cdr (first (cdr  rule)) ))) ) ;setting the premises and conclusion here
+                    
+   (let* ((premise (cdr (car rule))) (conclusion  (first (cdr (first (cdr  rule)) ))) ) 
 
-    (if (null prem  )  ;if prem is nil here, we return nil
-       nil)
-    (if (null conc) 
-        nil) ;if conclusion is nil here we return nil
-                   ;cdr here because we don't want no T in our list
-    (let* ((oriList  (UNIFY-FR  prem o-frames  )))
-        (SUBST-FR conc oriList)        
+            (if (or (null premise ) (null conclusion))
+               (return-from MP-INFER nil)
+            )
+            (let* ((binding  (UNIFY-FR  premise o-frames  )))
+
+                (SUBST-FR conclusion binding)        
+            )
     )
-)
 )
 
 ; -----------------------------------------------------------------------------
@@ -1137,73 +1129,39 @@
 ;                      end
 ; OUTPUT:   NEW-EPMEM
 
-(defun checkList (list1 list2)
-    (if (null list2) (return-from checkList nil)) ;base case
-   
-    ;checking if list1 is in list2
-    (if (EQUAL-SF list1 (car list2))
-        (return-from checkList T)
-        (checkList list1 (cdr list2))
+(defun FRAME-IN-LIST (frame list-x)
+    (if (null list-x) 
+        (return-from FRAME-IN-LIST nil)
+    ) 
+    (if (EQUAL-SF frame (car list-x))
+        (return-from FRAME-IN-LIST t)
+        (FRAME-IN-LIST frame (cdr list-x))
     )
 )
 
-(defun FRW-HELPER (rules epmem newC &optional (new-epmem nil))
-    (loop for mRule in rules do 
-        (setq new-epmem (MP-INFER mRule epmem))
-        (if (not (null (checkList new-epmem epmem)))
+(defun FRW-CHAIN-HELPER (rules epmem cache &optional (new-epmem nil) )
+    (loop for a-rule in rules do 
+        (setq new-epmem (MP-INFER a-rule epmem) )  
+        (if (not (null (FRAME-IN-LIST new-epmem epmem)) )  
             (setq new-epmem nil)
         )
-        (setq epmem (cons new-epmem epmem))
-
-        (if (not (null new-epmem))
-            (if (not (null newC))
-                (progn
-                    (setq newC (cons newC (list new-epmem)))
-                )
-                (setq newC new-epmem)
+       (setq epmem (cons new-epmem epmem))
+        (if (not ( null new-epmem ))
+            (if (not (null cache)) 
+                (setq cache (append cache (list new-epmem)))
+                (setq cache (list new-epmem))
             )
         )
+      
     )
     (if (null new-epmem) 
-        (return-from FRW-HELPER newC)
-        (FRW-HELPER rules epmem newC )
+        (return-from FRW-CHAIN-HELPER cache)
+        (FRW-CHAIN-HELPER rules epmem cache )
     )
-)
-
-(setq RULE-51 '((PREMISES (OWNS AGENT (V a1) OBJECT (V o1)) (ISA OBJECT (V o1) TYPE (ICE-CREAM))) (CONCLU (HAPPY AGENT (V a1)) )))
-
-(setq RULE-52 '((PREMISES (HAPPY AGENT (V a1))) (CONCLU (AWESOME AGENT (V a1)) )))
-
-(print (FRW-CHAIN (list RULE-51 RULE-52) '((OWNS AGENT (ANDREW) OBJECT (DRUMSTICK)) (ISA OBJECT (DRUMSTICK) TYPE (ICE-CREAM)))) )
-
-
-
-(print (FRW-CHAIN '(
-                                  ((PREMISES
-                                     (A B (V B1) C (V C1))
-                                   )
-                                   (CONCLU
-                                     (D B (V B1) C (V C1))
-                                   ))
-                                   
-                                  ((PREMISES
-                                     (D B (V B1) C (V C1))
-                                   )
-                                   (CONCLU
-                                     (A B (V C1) C (V B1))
-                                   ))
-                                 )
-                                 '(
-                                    (A B (B1) C (C1))
-                                  )
-                      ) 
 )
 
 (defun FRW-CHAIN (rules epmem &optional (new-epmem nil))    
-    
-    (FRW-HELPER rules epmem nil)
-
-
+    (FRW-CHAIN-HELPER rules epmem nil)
 )
 
 (setq RULE-51 '((PREMISES (OWNS AGENT (V a1) OBJECT (V o1)) (ISA OBJECT (V o1) TYPE (ICE-CREAM))) (CONCLU (HAPPY AGENT (V a1)) )))
@@ -1215,6 +1173,8 @@
 (FRW-CHAIN (list RULE-51 RULE-52) '((OWNS AGENT (ANDREW) OBJECT (DRUMSTICK)) (ISA OBJECT (DRUMSTICK) TYPE (ICE-CREAM)))) 
 
 )
+
+
 
 ; -----------------------------------------------------------------------------
 
@@ -1537,20 +1497,16 @@
 
 ;(print 
  ;(MP-INFER RULE-1 EPMEM)
+ ;(MP-INFER RULE-2 (LIST EP2 EP5))
  ;(MP-INFER RULE-3 (cons INF2 EPMEM))
  ;(MP-INFER RULE-4 EPMEM)
  ;(MP-INFER RULE-5 (cons INF3 EPMEM))
  ;(MP-INFER RULE-6 EPMEM)
  ;(MP-INFER RULE-7 (cons INF5 EPMEM))
 ;)
-(setq BD1 '(T ((V HX1) (HUMAN F-NAME (GEORGE) GENDER (MALE)))
-         ((V SS01) (S2))
-         ((V TY01) (TERMINAL))
-      )
-      )
 
-;(print 
- ;   (SUBST-FR FR6 BD1)
 
-;)
+
+
+
 
